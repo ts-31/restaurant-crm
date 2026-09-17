@@ -6,6 +6,7 @@ export interface Restaurant {
   id: string;
   name: string;
   slug: string;
+  tagline?: string | null;
   tax_rate: number;
   default_tip_rate: number;
   currency: string;

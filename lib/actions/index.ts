@@ -298,8 +298,9 @@ export async function deleteMenuItem(id: string) {
 
 export async function updateRestaurantSettings(input: {
   name: string;
+  tagline?: string | null;
   tax_rate: number;
-  default_tip_rate: number;
+  default_tip_rate?: number;
   currency?: string;
   logo_url?: string | null;
   accent_color?: string | null;
@@ -316,16 +317,31 @@ export async function updateRestaurantSettings(input: {
     .single();
   if (!profile) return { error: "No staff profile" };
 
+  const basePayload: Record<string, any> = {
+    name: input.name,
+    tax_rate: input.tax_rate,
+    default_tip_rate: input.default_tip_rate ?? 0,
+    currency: input.currency ?? "EUR",
+    logo_url: input.logo_url !== undefined ? input.logo_url : undefined,
+    accent_color: input.accent_color !== undefined ? input.accent_color : undefined,
+  };
+
+  if (input.tagline !== undefined) {
+    const { error: taglineError } = await supabase
+      .from("restaurants")
+      .update({ ...basePayload, tagline: input.tagline })
+      .eq("id", profile.restaurant_id);
+
+    if (!taglineError) {
+      revalidatePath("/dashboard/settings");
+      revalidatePath("/dashboard");
+      return { ok: true };
+    }
+  }
+
   const { error } = await supabase
     .from("restaurants")
-    .update({
-      name: input.name,
-      tax_rate: input.tax_rate,
-      default_tip_rate: input.default_tip_rate,
-      currency: input.currency ?? "EUR",
-      logo_url: input.logo_url !== undefined ? input.logo_url : undefined,
-      accent_color: input.accent_color !== undefined ? input.accent_color : undefined,
-    })
+    .update(basePayload)
     .eq("id", profile.restaurant_id);
 
   if (error) return { error: error.message };

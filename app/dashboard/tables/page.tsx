@@ -22,6 +22,7 @@ export default async function TablesPage() {
       initialTables={(tables ?? []) as DiningTable[]}
       appUrl={appUrl}
       restaurantName={ctx.restaurant.name}
+      restaurantTagline={ctx.restaurant.tagline}
     />
   );
 }

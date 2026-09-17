@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { createTable, deleteTable, updateTable } from "@/lib/actions";
 import type { DiningTable } from "@/lib/types";
@@ -12,14 +12,15 @@ export function TablesManager({
   initialTables,
   appUrl,
   restaurantName = "Restaurant",
+  restaurantTagline,
 }: {
   initialTables: DiningTable[];
   appUrl: string;
   restaurantName?: string;
+  restaurantTagline?: string | null;
 }) {
   const [tables, setTables] = useState<DiningTable[]>(initialTables);
   const [label, setLabel] = useState("");
-  const [section, setSection] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [selectedQRTable, setSelectedQRTable] = useState<DiningTable | null>(null);
@@ -35,7 +36,14 @@ export function TablesManager({
       for (const t of tables) {
         const url = `${appUrl}/t/${t.id}`;
         try {
-          entries[t.id] = await QRCode.toDataURL(url, { margin: 1, width: 240 });
+          entries[t.id] = await QRCode.toDataURL(url, {
+            margin: 1,
+            width: 256,
+            color: {
+              dark: "#C9A84C",
+              light: "#141210",
+            },
+          });
         } catch {
           /* ignore */
         }
@@ -54,14 +62,13 @@ export function TablesManager({
 
     try {
       setIsCreating(true);
-      const result = await createTable(label.trim(), section.trim());
+      const result = await createTable(label.trim(), "");
       if (result.error || !result.table) {
         toast(result.error ?? "Failed to create table", "error");
         return;
       }
       setTables((prev) => [...prev, result.table as DiningTable]);
       setLabel("");
-      setSection("");
       toast(`Table "${label.trim()}" created successfully`, "success");
     } catch {
       toast("Error creating table", "error");
@@ -99,20 +106,10 @@ export function TablesManager({
     }
   }
 
-  // Group tables by section
-  const groupedTables = useMemo(() => {
-    const map = new Map<string, DiningTable[]>();
-    tables.forEach((t) => {
-      const sec = t.section?.trim() || "Main Area";
-      const existing = map.get(sec) || [];
-      existing.push(t);
-      map.set(sec, existing);
-    });
-    return map;
-  }, [tables]);
+
 
   return (
-    <div className="flex flex-col gap-space-lg max-w-6xl pb-12">
+    <div className="flex flex-col gap-space-lg max-w-7xl w-full pb-12">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-on-surface">Table Management & QR Codes</h1>
@@ -124,10 +121,10 @@ export function TablesManager({
       {/* Add Table Form */}
       <form
         onSubmit={onCreate}
-        className="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/30 shadow-xs flex flex-col sm:flex-row gap-3 items-end"
+        className="bg-[#141210] rounded-2xl p-4 border border-[#C9A84C]/20 shadow-xs flex flex-col sm:flex-row gap-3 items-end"
       >
         <div className="flex-1 w-full">
-          <label className="text-xs font-semibold text-on-surface block mb-1">
+          <label className="text-xs font-semibold text-[#F5ECD7] block mb-1">
             Table Label *
           </label>
           <input
@@ -135,134 +132,113 @@ export function TablesManager({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="e.g. Table 12, Bar 04, Patio B"
-            className="w-full bg-surface-container px-3 py-2 rounded-xl border border-outline-variant/30 text-sm focus:outline-none focus:border-primary placeholder:text-on-surface-variant/50"
-          />
-        </div>
-        <div className="flex-1 w-full">
-          <label className="text-xs font-semibold text-on-surface block mb-1">
-            Section / Floor Area
-          </label>
-          <input
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-            placeholder="e.g. Indoor Dining, Terrace, Rooftop"
-            className="w-full bg-surface-container px-3 py-2 rounded-xl border border-outline-variant/30 text-sm focus:outline-none focus:border-primary placeholder:text-on-surface-variant/50"
+            className="w-full bg-transparent px-3 py-2 rounded-xl border border-[#C9A84C]/20 text-sm text-[#F5ECD7] focus:outline-none focus:border-[#C9A84C] placeholder:text-[#F5ECD7]/30"
           />
         </div>
         <button
           type="submit"
           disabled={isCreating}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-xs hover:opacity-90 disabled:opacity-50 transition-all shrink-0"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#C9A84C] text-[#141210] font-bold text-sm shadow-xs hover:bg-[#D4B553] disabled:opacity-50 transition-colors shrink-0"
         >
-          {isCreating ? "Adding..." : "Add Table"}
+          {isCreating ? "Adding..." : "+ Add Table"}
         </button>
       </form>
 
-      {/* Tables Display by Section */}
+      {/* Tables Display */}
       <div className="flex flex-col gap-6">
         {tables.length === 0 ? (
-          <div className="bg-surface-container-low rounded-2xl p-12 text-center text-on-surface-variant text-sm border border-outline-variant/30">
+          <div className="bg-[#141210] rounded-2xl p-12 text-center text-[#F5ECD7]/60 text-sm border border-[#C9A84C]/20">
             No tables added yet. Add your first table above to generate its QR code.
           </div>
         ) : (
-          Array.from(groupedTables.entries()).map(([secName, secTables]) => (
-            <div key={secName} className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                  {secName} ({secTables.length})
-                </span>
-                <div className="h-px flex-1 bg-outline-variant/20" />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {secTables.map((table) => {
-                  const url = `${appUrl}/t/${table.id}`;
-                  return (
-                    <article
-                      key={table.id}
-                      className="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/30 shadow-xs flex flex-col justify-between gap-3 hover:border-primary/40 transition-colors"
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            {tables.map((table) => {
+              const url = `${appUrl}/t/${table.id}`;
+              return (
+                <article
+                  key={table.id}
+                  onClick={() => setSelectedQRTable(table)}
+                  className="bg-[#141210] rounded-2xl p-4 border border-[#C9A84C]/20 shadow-xs flex flex-col justify-between gap-3.5 hover:border-[#C9A84C]/50 hover:shadow-[0_0_18px_rgba(201,168,76,0.1)] transition-all cursor-pointer group"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="text-base font-bold text-[#F5ECD7] font-serif group-hover:text-[#C9A84C] transition-colors">
+                      {table.label}
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleStatus(table);
+                      }}
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 border ${
+                        table.is_active
+                          ? "bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20"
+                          : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
+                      }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h2 className="text-base font-bold text-on-surface">{table.label}</h2>
-                          <p className="text-xs text-on-surface-variant">{table.section || "General"}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStatus(table)}
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors ${
-                            table.is_active
-                              ? "bg-secondary/15 text-secondary border border-secondary/20"
-                              : "bg-error/10 text-error border border-error/20"
-                          }`}
-                        >
-                          {table.is_active ? "Active" : "Inactive"}
-                        </button>
-                      </div>
+                      <span className="text-[8px]">{table.is_active ? "●" : "●"}</span>
+                      {table.is_active ? "Active" : "Inactive"}
+                    </button>
+                  </div>
 
-                      {/* QR Thumbnail Preview */}
-                      <div
-                        onClick={() => setSelectedQRTable(table)}
-                        className="bg-white p-3 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden"
+                  {/* QR Thumbnail Preview - Square and Theme-Styled */}
+                  <div
+                    className="w-full max-w-[190px] aspect-square mx-auto bg-[#0d0c0a] p-2.5 rounded-2xl border border-[#C9A84C]/25 flex flex-col items-center justify-center relative overflow-hidden shrink-0 group-hover:border-[#C9A84C]/60 group-hover:shadow-[0_0_15px_rgba(201,168,76,0.15)] transition-all"
+                  >
+                    {qrMap[table.id] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={qrMap[table.id]}
+                        alt={`QR for ${table.label}`}
+                        className="w-32 h-32 object-contain group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 flex items-center justify-center text-xs text-[#F5ECD7]/40">
+                        Loading QR...
+                      </div>
+                    )}
+                    <span className="text-[10px] text-[#C9A84C]/80 mt-1 font-medium group-hover:text-[#F5ECD7] transition-colors flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[13px]">fullscreen</span>
+                      Click to Enlarge / Print
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[11px] text-[#C9A84C]/70 font-mono truncate px-1 text-center bg-[#C9A84C]/5 py-1 rounded-lg">
+                      /t/{table.qr_slug}
+                    </div>
+
+                    {/* Action buttons: Beautiful, spacious Copy Link + Delete */}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(url);
+                          toast("Table menu link copied", "info");
+                        }}
+                        className="flex-1 py-2 px-3 rounded-xl bg-[#C9A84C]/10 hover:bg-[#C9A84C]/20 border border-[#C9A84C]/30 text-[#C9A84C] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        {qrMap[table.id] ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={qrMap[table.id]}
-                            alt={`QR for ${table.label}`}
-                            className="w-36 h-36 object-contain group-hover:scale-105 transition-transform"
-                          />
-                        ) : (
-                          <div className="w-36 h-36 flex items-center justify-center text-xs text-slate-400">
-                            Loading QR...
-                          </div>
-                        )}
-                        <span className="text-[10px] text-slate-500 mt-1 font-medium group-hover:text-primary transition-colors flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[13px]">fullscreen</span>
-                          Click to Enlarge / Print
-                        </span>
-                      </div>
-
-                      <div className="text-[11px] text-on-surface-variant font-mono truncate px-1 text-center">
-                        /t/{table.qr_slug}
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex items-center gap-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedQRTable(table)}
-                          className="flex-1 py-1.5 px-2 rounded-xl bg-primary text-white text-xs font-semibold flex items-center justify-center gap-1 hover:opacity-90 shadow-xs transition-opacity"
-                        >
-                          <span className="material-symbols-outlined text-[15px]">qr_code</span>
-                          View QR
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(url);
-                            toast("Table menu link copied", "info");
-                          }}
-                          className="py-1.5 px-2.5 rounded-xl bg-surface-container text-on-surface text-xs font-medium hover:bg-surface-container-high transition-colors"
-                          title="Copy Table URL"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">content_copy</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(table)}
-                          className="p-1.5 rounded-xl text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors"
-                          title="Delete table"
-                        >
-                          <span className="material-symbols-outlined text-[17px]">delete</span>
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          ))
+                        <span className="material-symbols-outlined text-[15px]">link</span>
+                        Copy Link
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(table);
+                        }}
+                        className="py-2 px-2.5 rounded-xl border border-red-500/25 text-red-400/80 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-colors flex items-center justify-center shrink-0"
+                        title="Delete table"
+                      >
+                        <span className="material-symbols-outlined text-[17px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -271,6 +247,7 @@ export function TablesManager({
         open={!!selectedQRTable}
         table={selectedQRTable}
         restaurantName={restaurantName}
+        restaurantTagline={restaurantTagline}
         appUrl={appUrl}
         onClose={() => setSelectedQRTable(null)}
       />
