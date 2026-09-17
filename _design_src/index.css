@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-fixed: #ffdbd0;
+  --color-on-error-container: #93000a;
+  --color-surface-container-highest: #e9e1dc;
+  --color-error: #ba1a1a;
+  --color-on-secondary-fixed-variant: #2f4e2e;
+  --color-outline: #8d7169;
+  --color-surface-bright: #fff8f4;
+  --color-tertiary-container: #996c14;
+  --color-surface-variant: #e9e1dc;
+  --color-tertiary-fixed: #ffdead;
+  --color-on-primary-fixed: #3a0a00;
+  --color-secondary-fixed-dim: #acd0a6;
+  --color-surface: #fff8f4;
+  --color-secondary: #466644;
+  --color-inverse-primary: #ffb59f;
+  --color-on-surface: #1e1b18;
+  --color-error-container: #ffdad6;
+  --color-on-tertiary-fixed-variant: #604100;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #efe7e1;
+  --color-tertiary-fixed-dim: #f5bd60;
+  --color-on-primary: #ffffff;
+  --color-inverse-on-surface: #f7efea;
+  --color-on-secondary: #ffffff;
+  --color-primary-fixed-dim: #ffb59f;
+  --color-outline-variant: #e1bfb6;
+  --color-tertiary: #7c5400;
+  --color-primary: #a93103;
+  --color-inverse-surface: #33302c;
+  --color-on-background: #1e1b18;
+  --color-on-secondary-fixed: #032106;
+  --color-surface-container-low: #faf2ec;
+  --color-secondary-container: #c5eabe;
+  --color-primary-container: #cb491e;
+  --color-on-tertiary: #ffffff;
+  --color-on-secondary-container: #4a6a47;
+  --color-surface-tint: #ac3406;
+  --color-on-tertiary-fixed: #281900;
+  --color-on-error: #ffffff;
+  --color-on-primary-container: #fffbff;
+  --color-surface-container: #f5ece7;
+  --color-secondary-fixed: #c8ecc0;
+  --color-on-tertiary-container: #fffbff;
+  --color-on-primary-fixed-variant: #852400;
+  --color-on-surface-variant: #59413a;
+  --color-surface-dim: #e0d9d3;
+  --color-background: #fff8f4;
+
+  --spacing-margin-desktop: 2.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-xl: 2.25rem;
+  --spacing-margin-tablet: 1.5rem;
+  --spacing-gutter-desktop: 1.5rem;
+  --spacing-margin: 1rem;
+  --spacing-gutter: 1rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-lg: 1.5rem;
+
+  --font-body-lg: "Plus Jakarta Sans";
+  --font-label-lg: "Plus Jakarta Sans";
+  --font-title-lg: "Plus Jakarta Sans";
+  --font-display-mobile: "Playfair Display";
+  --font-body-sm: "Plus Jakarta Sans";
+  --font-title-md: "Plus Jakarta Sans";
+  --font-headline-sm: "Playfair Display";
+  --font-display: "Playfair Display";
+  --font-body-md: "Plus Jakarta Sans";
+  --font-headline-md: "Playfair Display";
+  --font-label-md: "Plus Jakarta Sans";
+  --font-headline-lg-mobile: "Playfair Display";
+  --font-label-sm: "Plus Jakarta Sans";
+  --font-headline-lg: "Playfair Display";
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-label-lg: 14px;
+  --text-label-lg--line-height: 18px;
+  --text-title-lg: 18px;
+  --text-title-lg--line-height: 26px;
+  --text-display-mobile: 36px;
+  --text-display-mobile--line-height: 44px;
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 16px;
+  --text-title-md: 16px;
+  --text-title-md--line-height: 24px;
+  --text-headline-sm: 20px;
+  --text-headline-sm--line-height: 28px;
+  --text-display: 48px;
+  --text-display--line-height: 56px;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-headline-lg-mobile: 26px;
+  --text-headline-lg-mobile--line-height: 34px;
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 14px;
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+}
+
+@layer base {
+  html,
+  body {
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    overscroll-behavior: none;
+    @apply bg-surface text-on-surface font-body-md;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  main > :first-child {
+    margin-top: 0 !important;
+  }
+  main > :last-child {
+    margin-bottom: 0 !important;
+  }
+}
+::-webkit-scrollbar {
+  display: none;
+}

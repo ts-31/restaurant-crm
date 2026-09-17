@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# L'Ambre TableFlow
 
-## Getting Started
+QR table ordering for restaurants — digital menu, table-based cart, staff kitchen dashboard, menu & QR management.
 
-First, run the development server:
+**Stack:** Next.js App Router · TypeScript · Tailwind CSS v4 · Supabase
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Setup
+
+1. Create a Supabase project.
+2. In the SQL editor, run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql).
+3. In the SQL editor, run [`supabase/migrations/0002_seed_admin.sql`](supabase/migrations/0002_seed_admin.sql) (creates the single admin account).
+4. Copy `.env.example` to `.env.local` and fill in:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Enable Email auth in Supabase (Authentication → Providers → Email). Turn **off** “Enable sign ups” so only the seeded admin can access the dashboard.
+6. Install and run:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+7. Open http://localhost:3000/login and sign in with the seeded admin:
+   - Email: `tejas2025s@gmail.com`
+   - Password: `Admin@123`
+8. Guest demo menu: `/t/a0000000-0000-4000-8000-000000000014` (Table 14) or print QR codes from **Dashboard → Table QR Codes**.
 
-## Learn More
+## Routes
 
-To learn more about Next.js, take a look at the following resources:
+| Path | Purpose |
+|------|---------|
+| `/` | Landing |
+| `/login` | Admin sign in |
+| `/t/[tableId]` | Guest QR menu |
+| `/t/[tableId]/cart` | Cart / place order |
+| `/t/[tableId]/order/[orderId]` | Live order status |
+| `/dashboard` | Live kitchen kanban |
+| `/dashboard/menu` | Menu CRUD + 86 |
+| `/dashboard/tables` | Table QR codes |
+| `/dashboard/settings` | Tax / tip / name |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design source
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+UI fidelity is based on the AI Studio prototype kept in `_design_src/` (L'Ambre / TableFlow visual system).
