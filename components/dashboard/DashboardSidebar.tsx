@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const NAV = [
   { href: "/dashboard", label: "Live Orders", icon: "table_restaurant" },
@@ -29,6 +30,7 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -111,28 +113,41 @@ export function DashboardSidebar({
       </div>
 
       {/* User Card */}
-      <div className="p-3 bg-[#1a1816] rounded-xl flex items-center gap-3 border border-[#C9A84C]/15">
-        <div className="w-9 h-9 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-[18px]">person</span>
-        </div>
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="font-label-md text-label-md text-[#F5ECD7] truncate font-medium">
-            {staffName || "Staff"}
-          </span>
-          <span className="font-label-sm text-label-sm text-[#C9A84C] truncate text-[10px] uppercase tracking-wider">
-            Restaurant Lead
-          </span>
+      <div className="p-3 bg-[#1a1816] rounded-xl flex flex-col gap-3 border border-[#C9A84C]/15">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">person</span>
+          </div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="font-label-md text-label-md text-[#F5ECD7] truncate font-medium">
+              {staffName || "Staff"}
+            </span>
+            <span className="font-label-sm text-label-sm text-[#C9A84C] truncate text-[10px] uppercase tracking-wider">
+              Restaurant Lead
+            </span>
+          </div>
         </div>
         <button
           type="button"
-          title="Sign out"
-          disabled={signingOut}
-          onClick={handleSignOut}
-          className="p-1.5 rounded-lg text-[#A89880] hover:text-[#E86C5D] hover:bg-[#E86C5D]/10 transition-colors disabled:opacity-50"
+          onClick={() => setShowSignOutConfirm(true)}
+          className="w-full py-2 px-3 rounded-lg bg-[#E86C5D]/10 hover:bg-[#E86C5D]/20 border border-[#E86C5D]/20 text-[#E86C5D] font-label-sm text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
         >
-          <span className="material-symbols-outlined text-[19px]">logout</span>
+          <span className="material-symbols-outlined text-[15px]">logout</span>
+          Sign Out
         </button>
       </div>
+
+      <ConfirmDialog
+        open={showSignOutConfirm}
+        title="Sign out of SAVORA?"
+        description="Are you sure you want to sign out of the admin console? You will need to log back in to manage your restaurant."
+        confirmLabel="Sign Out"
+        cancelLabel="Cancel"
+        danger
+        loading={signingOut}
+        onConfirm={handleSignOut}
+        onCancel={() => setShowSignOutConfirm(false)}
+      />
     </aside>
   );
 }

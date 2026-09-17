@@ -276,7 +276,7 @@ export function LiveOrdersBoard({
             return (
               <article
                 key={order.id}
-                className={`relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 ${
+                className={`relative flex flex-col h-[520px] rounded-2xl overflow-hidden transition-all duration-300 ${
                   isServed
                     ? "opacity-50 border border-[#C9A84C]/10"
                     : isRecent
@@ -286,7 +286,7 @@ export function LiveOrdersBoard({
                 style={{ background: isServed ? "#0f0e0c" : isRecent ? "#16140f" : "#131210" }}
               >
                 {/* ── Hero Food Photo ── */}
-                <div className="relative w-full h-48 bg-[#0c0b09] shrink-0">
+                <div className="relative w-full h-44 bg-[#0c0b09] shrink-0">
                   {heroPhoto ? (
                     <Image
                       src={heroPhoto}
@@ -350,15 +350,15 @@ export function LiveOrdersBoard({
                   )}
                 </div>
 
-                {/* ── Additional Items (compact rows) ── */}
-                {restItems.length > 0 && (
-                  <div className="flex flex-col gap-2 px-4 pt-3">
-                    {restItems.map((item) => {
+                {/* ── Middle Body: Items or Order Details (Scrollable) ── */}
+                <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 flex flex-col gap-2.5">
+                  {restItems.length > 0 ? (
+                    restItems.map((item) => {
                       const photo = getPhoto(item);
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center gap-3 p-2.5 rounded-xl bg-[#0c0b09] border border-[#C9A84C]/10"
+                          className="flex items-center gap-3 p-2.5 rounded-xl bg-[#0c0b09] border border-[#C9A84C]/10 shrink-0"
                         >
                           {/* Small thumbnail */}
                           {photo ? (
@@ -393,23 +393,67 @@ export function LiveOrdersBoard({
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
-                )}
+                    })
+                  ) : (
+                    /* Single-dish orders: High-end ticket specs to fill card intentionally */
+                    <div className="h-full flex flex-col justify-between p-3.5 rounded-xl bg-[#0c0b09]/80 border border-[#C9A84C]/15">
+                      <div className="flex flex-col gap-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] uppercase tracking-wider text-[#A89880] font-mono font-medium">
+                            Ticket Ref
+                          </span>
+                          <span className="text-xs font-mono font-bold text-[#C9A84C]">
+                            #{order.order_number || order.id.slice(0, 6).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="h-px bg-[#C9A84C]/10" />
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] uppercase tracking-wider text-[#A89880] font-mono font-medium">
+                            Table Location
+                          </span>
+                          <span className="text-xs text-[#F5ECD7] font-medium">
+                            {section ? `${section} · ${tableLabel}` : tableLabel}
+                          </span>
+                        </div>
+                        <div className="h-px bg-[#C9A84C]/10" />
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] uppercase tracking-wider text-[#A89880] font-mono font-medium">
+                            Kitchen Status
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/25 text-[#C9A84C] text-[10px] font-bold uppercase tracking-wider">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-pulse" />
+                            Direct Dispatch
+                          </span>
+                        </div>
+                      </div>
 
-                {/* ── Chef notes ── */}
-                {order.chef_notes && (
-                  <div className="mx-4 mt-3 flex items-start gap-2 p-2.5 rounded-xl bg-[#3D2E0A]/60 border border-[#C9A84C]/25 text-xs">
-                    <span className="material-symbols-outlined text-[#C9A84C] text-[15px] shrink-0 mt-0.5">speaker_notes</span>
-                    <p className="text-[#F5ECD7] font-medium leading-snug">
-                      <span className="text-[#C9A84C] font-bold">Note: </span>{order.chef_notes}
-                    </p>
-                  </div>
-                )}
+                      {heroItem?.note ? (
+                        <div className="mt-2 p-2 rounded-lg bg-[#3D2E0A]/40 border border-[#C9A84C]/20 text-[11px] text-[#F5ECD7]">
+                          <span className="text-[#C9A84C] font-bold">Guest Request: </span>{heroItem.note}
+                        </div>
+                      ) : (
+                        <div className="mt-2 text-[11px] text-[#A89880]/70 italic flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[14px] text-[#C9A84C]/60">verified</span>
+                          Single course order · Verified table ticket
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                {/* ── Footer: Total + Actions ── */}
-                <div className="mt-auto px-4 pb-4 pt-3 flex flex-col gap-3">
-                  <div className="flex items-center justify-between border-t border-[#C9A84C]/15 pt-3">
+                  {/* ── Chef notes ── */}
+                  {order.chef_notes && (
+                    <div className="flex items-start gap-2 p-2.5 rounded-xl bg-[#3D2E0A]/60 border border-[#C9A84C]/25 text-xs shrink-0">
+                      <span className="material-symbols-outlined text-[#C9A84C] text-[15px] shrink-0 mt-0.5">speaker_notes</span>
+                      <p className="text-[#F5ECD7] font-medium leading-snug">
+                        <span className="text-[#C9A84C] font-bold">Note: </span>{order.chef_notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Footer: Total + Actions (Pinned to bottom) ── */}
+                <div className="px-4 pb-4 pt-3 flex flex-col gap-3 shrink-0 border-t border-[#C9A84C]/15 bg-[#131210]">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-[#A89880]">Total Bill</span>
                     <span className="text-lg font-black text-[#C9A84C] font-mono">
                       {formatMoney(Number(order.total))}
@@ -422,7 +466,7 @@ export function LiveOrdersBoard({
                         type="button"
                         disabled={isProcessing}
                         onClick={() => handleMarkServed(order.id, tableLabel)}
-                        className="flex-1 py-3.5 px-4 rounded-xl bg-[#C9A84C] text-[#0f0e0c] font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="flex-1 py-3 px-4 rounded-xl bg-[#C9A84C] text-[#0f0e0c] font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         {isProcessing ? (
                           <>
