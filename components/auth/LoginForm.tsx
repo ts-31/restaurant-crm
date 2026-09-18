@@ -40,7 +40,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5 w-full">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3.5 w-full">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="login-email" className="font-label-md text-label-md text-[#A89880] uppercase tracking-widest text-[10px]">
           Email Address
@@ -49,7 +49,7 @@ export function LoginForm() {
           id="login-email"
           type="email"
           required
-          className="w-full px-4 py-3 rounded-xl font-body-md text-body-md text-[#F5ECD7] placeholder:text-[#5A4A35] focus:outline-none transition-all"
+          className="w-full px-4 py-2.5 rounded-xl font-body-md text-body-md text-[#F5ECD7] placeholder:text-[#5A4A35] focus:outline-none transition-all"
           style={{
             background: "#0f0e0c",
             border: "1px solid rgba(201,168,76,0.2)",
@@ -72,7 +72,7 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             required
             minLength={6}
-            className="w-full px-4 py-3 pr-12 rounded-xl font-body-md text-body-md text-[#F5ECD7] placeholder:text-[#5A4A35] focus:outline-none transition-all"
+            className="w-full px-4 py-2.5 pr-12 rounded-xl font-body-md text-body-md text-[#F5ECD7] placeholder:text-[#5A4A35] focus:outline-none transition-all"
             style={{
               background: "#0f0e0c",
               border: "1px solid rgba(201,168,76,0.2)",
@@ -81,6 +81,7 @@ export function LoginForm() {
             onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(201,168,76,0.2)"; e.currentTarget.style.boxShadow = "none"; }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
             autoComplete="current-password"
           />
           <button
@@ -107,7 +108,7 @@ export function LoginForm() {
         id="login-submit"
         type="submit"
         disabled={loading}
-        className="w-full min-h-[52px] rounded-xl font-label-lg text-label-lg font-semibold disabled:opacity-60 transition-all flex items-center justify-center gap-2 mt-2"
+        className="w-full min-h-[46px] rounded-xl font-label-lg text-label-lg font-semibold disabled:opacity-60 transition-all flex items-center justify-center gap-2 mt-1"
         style={{
           background: loading ? "#8B6914" : "#C9A84C",
           color: "#0f0e0c",
