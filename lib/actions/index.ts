@@ -317,7 +317,7 @@ export async function updateRestaurantSettings(input: {
     .single();
   if (!profile) return { error: "No staff profile" };
 
-  const basePayload: Record<string, any> = {
+  const basePayload: Record<string, unknown> = {
     name: input.name,
     tax_rate: input.tax_rate,
     default_tip_rate: input.default_tip_rate ?? 0,

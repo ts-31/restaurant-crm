@@ -22,10 +22,10 @@ type Props = {
   tableId: string;
   tableLabel: string;
   taxRate: number;
-  defaultTipRate: number;
+  defaultTipRate?: number;
 };
 
-export function CartView({ tableId, tableLabel, taxRate, defaultTipRate }: Props) {
+export function CartView({ tableId, tableLabel, taxRate }: Props) {
   const router = useRouter();
   const [cart, setCart] = useState<CartState | null>(null);
   const [placing, setPlacing] = useState(false);

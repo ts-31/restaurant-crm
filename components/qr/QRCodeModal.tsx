@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import type { DiningTable } from "@/lib/types";
 import { useToast } from "@/components/ui/Toast";
