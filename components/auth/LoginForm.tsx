@@ -4,9 +4,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { useTopLoader } from "@/components/ui/TopLoader";
 
 export function LoginForm() {
   const router = useRouter();
+  const { startLoading } = useTopLoader();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +19,7 @@ export function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    startLoading();
     const supabase = createClient();
 
     try {
