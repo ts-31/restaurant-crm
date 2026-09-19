@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/auth/LoginForm";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -18,7 +19,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-5">
         {/* Brand */}
-        <div className="flex flex-col items-center gap-2">
+        <Link href="/" className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
           <div className="w-11 h-11 rounded-2xl bg-[#C9A84C]/10 border border-[#C9A84C]/30 flex items-center justify-center">
             <span className="material-symbols-outlined text-[#C9A84C] text-[24px]">restaurant</span>
           </div>
@@ -32,7 +33,7 @@ export default function LoginPage() {
               Restaurant Management
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Card */}
         <div className="w-full bg-[#131210] border border-[#C9A84C]/15 rounded-2xl p-6 flex flex-col gap-1"
