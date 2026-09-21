@@ -1,50 +1,45 @@
-# L'Ambre TableFlow
+# TableFlow — Client Demo
 
-QR table ordering for restaurants — digital menu, table-based cart, staff kitchen dashboard, menu & QR management.
+A contactless QR table-ordering experience for restaurants.
 
-**Stack:** Next.js App Router · TypeScript · Tailwind CSS v4 · Supabase
+Guests scan a table QR, order from their phone, and track progress live.  
+Staff manage the kitchen board, menu, tables, and branding from one dashboard.
 
-## Setup
+---
 
-1. Create a Supabase project.
-2. In the SQL editor, run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql).
-3. In the SQL editor, run [`supabase/migrations/0002_seed_admin.sql`](supabase/migrations/0002_seed_admin.sql) (creates the single admin account).
-4. Copy `.env.example` to `.env.local` and fill in:
+## Try the demo
 
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+| Role | What to open |
+|------|----------------|
+| **Guest** | Scan a table QR, or open the demo table menu from the landing page |
+| **Staff** | Use **Staff Login** on the landing page to open the dashboard |
 
-5. Enable Email auth in Supabase (Authentication → Providers → Email). Turn **off** “Enable sign ups” so only the seeded admin can access the dashboard.
-6. Install and run:
+**Guest flow:** Menu → Cart → Place order → Live status  
+**Staff flow:** Live orders → Menu → Table QR codes → Settings
 
-```bash
-npm install
-npm run dev
-```
+---
 
-7. Open http://localhost:3000/login and sign in with the seeded admin:
-   - Email: `tejas2025s@gmail.com`
-   - Password: `Admin@123`
-8. Guest demo menu: `/t/a0000000-0000-4000-8000-000000000014` (Table 14) or print QR codes from **Dashboard → Table QR Codes**.
+## What’s included
 
-## Routes
+### Guest experience
+- Instant digital menu from a table QR
+- Categories, dietary tags, and signature dishes
+- Cart with kitchen notes and tax-aware totals
+- Live order tracking: Received → Cooking → Ready → Delivered
 
-| Path | Purpose |
-|------|---------|
-| `/` | Landing |
-| `/login` | Admin sign in |
-| `/t/[tableId]` | Guest QR menu |
-| `/t/[tableId]/cart` | Cart / place order |
-| `/t/[tableId]/order/[orderId]` | Live order status |
-| `/dashboard` | Live kitchen kanban |
-| `/dashboard/menu` | Menu CRUD + 86 |
-| `/dashboard/tables` | Table QR codes |
-| `/dashboard/settings` | Tax / tip / name |
+### Staff dashboard
+- Real-time kitchen board with new-order alerts
+- Order history with search and status updates
+- Full menu management (dishes, images, 86’d items)
+- Table QR codes — generate, download, and print
+- Restaurant branding — name, logo, tagline, currency, tax, accent color
 
-## Design source
+---
 
-UI fidelity is based on the AI Studio prototype kept in `_design_src/` (L'Ambre / TableFlow visual system).
+## Built with
+
+Next.js · TypeScript · Tailwind CSS · Supabase Realtime
+
+---
+
+*This is a working demo for client review — not a production deployment.*
