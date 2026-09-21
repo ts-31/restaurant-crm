@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTopLoader } from "@/components/ui/TopLoader";
 
@@ -14,6 +14,23 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const fillDemoCredentials = () => {
+    setEmail("admin@gmail.com");
+    setPassword("Admin@123");
+  };
+
+  useEffect(() => {
+    const handleFillCredentials = () => {
+      fillDemoCredentials();
+    };
+
+    window.addEventListener("fillDemoCredentials", handleFillCredentials);
+
+    return () => {
+      window.removeEventListener("fillDemoCredentials", handleFillCredentials);
+    };
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
