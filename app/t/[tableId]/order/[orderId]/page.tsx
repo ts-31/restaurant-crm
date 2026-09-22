@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { resolveTableParam } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { OrderStatusView } from "@/components/cart/OrderStatusView";
-import type { Order, OrderItem } from "@/lib/types";
+import type { Order, OrderItem, Restaurant } from "@/lib/types";
 
 export default async function OrderPage({
   params,
@@ -19,6 +19,9 @@ export default async function OrderPage({
 
   const { data: items } = await supabase.from("order_items").select("*").eq("order_id", orderId);
 
+  // resolveTableParam already joins restaurants(*) — extract it for the share card
+  const restaurant = (table.restaurants ?? null) as Restaurant | null;
+
   return (
     <OrderStatusView
       tableId={table.id}
@@ -26,6 +29,7 @@ export default async function OrderPage({
       initialOrder={order as Order}
       initialItems={(items ?? []) as OrderItem[]}
       currency={table.restaurants?.currency || "EUR"}
+      restaurant={restaurant}
     />
   );
 }

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Order, OrderItem, OrderStatus } from "@/lib/types";
+import type { Order, OrderItem, OrderStatus, Restaurant } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
+import { ShareButton } from "./ShareButton";
 
 const STATUS_STEPS: { status: OrderStatus; label: string; icon: string }[] = [
   { status: "new", label: "Received", icon: "check_circle" },
@@ -19,6 +20,7 @@ type Props = {
   initialOrder: Order;
   initialItems: OrderItem[];
   currency?: string;
+  restaurant?: Restaurant | null;
 };
 
 export function OrderStatusView({
@@ -27,6 +29,7 @@ export function OrderStatusView({
   initialOrder,
   initialItems,
   currency = "EUR",
+  restaurant = null,
 }: Props) {
   const [order, setOrder] = useState(initialOrder);
   const [items] = useState(initialItems);
@@ -125,6 +128,16 @@ export function OrderStatusView({
             </div>
           </div>
         </section>
+
+        {/* Social Share Card */}
+        <ShareButton
+          restaurant={restaurant}
+          items={items}
+          tableLabel={tableLabel}
+          tableId={tableId}
+          total={Number(order.total)}
+          currency={currency}
+        />
 
         {/* Dishes Ordered */}
         <section className="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/30 shadow-xs flex flex-col gap-3">
