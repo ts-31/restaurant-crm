@@ -36,7 +36,7 @@ export function DashboardSidebar({
     try {
       setSigningOut(true);
       await signOut();
-      router.push("/login");
+      router.push("/");
       router.refresh();
     } catch {
       setSigningOut(false);

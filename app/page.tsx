@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { useInView } from "@/components/ui/useInView";
 import QRCode from "qrcode";
@@ -13,23 +11,11 @@ export default function HomePage() {
 }
 
 function HomePageContent() {
-  const router = useRouter();
   const [heroRef, heroInView] = useInView();
   const [featuresRef, featuresInView] = useInView();
   const [socialRef, socialInView] = useInView();
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const qrRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        router.push("/dashboard");
-      }
-    };
-    checkAuth();
-  }, [router]);
 
   useEffect(() => {
     const generateQR = async () => {

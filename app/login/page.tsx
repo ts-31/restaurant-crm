@@ -85,7 +85,7 @@ export default function LoginPage() {
           </p>
           <LoginForm />
 
-          {/* Circular Autofill Button */}
+          {/* Circular Autofill Button — desktop only */}
           <button
             type="button"
             aria-label="Autofill demo credentials"
@@ -102,7 +102,7 @@ export default function LoginPage() {
               e.currentTarget.style.boxShadow = "0 4px 20px rgba(201,168,76,0.4)";
               e.currentTarget.style.background = "linear-gradient(135deg, #C9A84C 0%, #D4A05A 100%)";
             }}
-            className="absolute -right-16 top-[58%] w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 animate-bounce-once"
+            className="hidden md:flex absolute -right-16 top-[58%] w-12 h-12 rounded-full items-center justify-center transition-all duration-300 hover:scale-110 animate-bounce-once"
             style={{
               background: "linear-gradient(135deg, #C9A84C 0%, #D4A05A 100%)",
               color: "#0f0e0c",

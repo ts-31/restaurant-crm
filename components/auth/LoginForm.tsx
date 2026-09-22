@@ -125,10 +125,20 @@ export function LoginForm() {
       )}
 
       <button
+        type="button"
+        onClick={fillDemoCredentials}
+        disabled={loading}
+        className="md:hidden w-full min-h-[44px] rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 border border-[#C9A84C]/30 text-[#C9A84C] hover:bg-[#C9A84C]/10 active:scale-[0.98] transition-all disabled:opacity-60 mt-1"
+      >
+        <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
+        Use demo credentials
+      </button>
+
+      <button
         id="login-submit"
         type="submit"
         disabled={loading}
-        className="w-full min-h-[46px] rounded-xl font-label-lg text-label-lg font-semibold disabled:opacity-60 transition-all flex items-center justify-center gap-2 mt-1"
+        className="w-full min-h-[46px] rounded-xl font-label-lg text-label-lg font-semibold disabled:opacity-60 transition-all flex items-center justify-center gap-2"
         style={{
           background: loading ? "#8B6914" : "#C9A84C",
           color: "#0f0e0c",

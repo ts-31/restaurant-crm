@@ -30,6 +30,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isDashboard = path.startsWith("/dashboard");
   const isLogin = path === "/login";
+  const isHome = path === "/";
 
   if (isDashboard && !user) {
     const url = request.nextUrl.clone();
@@ -38,7 +39,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isLogin && user) {
+  if ((isLogin || isHome) && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
