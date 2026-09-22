@@ -17,41 +17,6 @@ type Props = {
   tableCount?: number;
 };
 
-function playOrderChime() {
-  try {
-    const AudioContextClass =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-    const now = ctx.currentTime;
-
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(659.25, now);
-    gain1.gain.setValueAtTime(0.18, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.35);
-
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(830.61, now + 0.12);
-    gain2.gain.setValueAtTime(0.22, now + 0.12);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(now + 0.12);
-    osc2.stop(now + 0.65);
-  } catch {
-    // AudioContext blocked by autoplay policy until interaction
-  }
-}
-
 export function LiveOrdersBoard({
   restaurantId,
   initialOrders,
@@ -59,7 +24,6 @@ export function LiveOrdersBoard({
 }: Props) {
   const [orders, setOrders] = useState<OrderWithItems[]>(initialOrders);
   const [currentTime, setCurrentTime] = useState("");
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<OrderWithItems | null>(null);
   const [showServed, setShowServed] = useState(false);
@@ -118,8 +82,6 @@ export function LiveOrdersBoard({
         async (payload) => {
           if (!knownIds.current.has(payload.new.id)) {
             knownIds.current.add(payload.new.id);
-            if (soundEnabled) playOrderChime();
-            toast("New table order received!", "info");
             await refetch();
           }
         }
@@ -137,7 +99,7 @@ export function LiveOrdersBoard({
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [restaurantId, soundEnabled, refetch, toast]);
+  }, [restaurantId, refetch]);
 
   const handleMarkServed = async (orderId: string, tableLabel: string) => {
     try {
@@ -180,6 +142,7 @@ export function LiveOrdersBoard({
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-16">
 
+
       {/* ─── Control Bar ─────────────────────────────────────────── */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#131210] border border-[#C9A84C]/20 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-3.5">
@@ -215,20 +178,8 @@ export function LiveOrdersBoard({
           <div className="px-3 py-1.5 rounded-xl bg-[#1a1816] border border-[#C9A84C]/15 font-mono text-xs text-[#C9A84C] font-semibold hidden md:inline-block">
             {currentTime}
           </div>
-          <button
-            type="button"
-            onClick={() => { setSoundEnabled((v) => !v); if (!soundEnabled) playOrderChime(); }}
-            title={soundEnabled ? "Chime ON" : "Chime MUTED"}
-            className={`p-2 rounded-xl border transition-colors flex items-center justify-center ${
-              soundEnabled
-                ? "bg-[#C9A84C]/10 border-[#C9A84C]/35 text-[#C9A84C]"
-                : "bg-[#1a1816] border-[#C9A84C]/15 text-[#5A4A35] hover:text-[#A89880]"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              {soundEnabled ? "notifications_active" : "notifications_off"}
-            </span>
-          </button>
+
+
           {servedOrders.length > 0 && (
             <button
               type="button"
@@ -518,6 +469,8 @@ export function LiveOrdersBoard({
         onConfirm={handleCancelOrder}
         onCancel={() => setCancelTarget(null)}
       />
+
+
     </div>
   );
 }

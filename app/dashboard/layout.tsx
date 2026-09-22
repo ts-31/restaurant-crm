@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { DashboardSidebar, MobileDashboardNav } from "@/components/dashboard/DashboardSidebar";
+import { GlobalOrderAlert } from "@/components/dashboard/GlobalOrderAlert";
 import { getStaffContext } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,6 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <span className="text-xs text-[#C9A84C] font-mono bg-[#1a1816] px-2.5 py-1 rounded-md border border-[#C9A84C]/20 hidden sm:inline-block">
               {ctx.restaurant.currency || "EUR"}
             </span>
+            <GlobalOrderAlert restaurantId={ctx.restaurant.id} />
           </div>
         </header>
         <main className="relative w-full min-h-[calc(100vh-4rem)] px-4 md:px-6 py-6" style={{ background: "#0f0e0c" }}>
