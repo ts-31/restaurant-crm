@@ -17,6 +17,7 @@ import { placeOrder } from "@/lib/actions";
 import type { CartState } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { QtyStepper } from "@/components/ui/QtyStepper";
+import { useTopLoader } from "@/components/ui/TopLoader";
 
 type Props = {
   tableId: string;
@@ -27,6 +28,7 @@ type Props = {
 
 export function CartView({ tableId, tableLabel, taxRate }: Props) {
   const router = useRouter();
+  const { startLoading, stopLoading } = useTopLoader();
   const [cart, setCart] = useState<CartState | null>(null);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +58,7 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
     if (!cart || cart.lines.length === 0) return;
     setPlacing(true);
     setError(null);
+    startLoading();
     const result = await placeOrder({
       tableId,
       pacing: "Together",
@@ -67,8 +70,9 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
         note: l.note,
       })),
     });
-    setPlacing(false);
     if (result.error || !result.orderId) {
+      setPlacing(false);
+      stopLoading();
       setError(result.error ?? "Failed to place order");
       return;
     }
