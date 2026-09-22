@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ShareCard, type ShareCardHandle } from "./ShareCard";
+import { FoodPhotoModal } from "./FoodPhotoModal";
 import type { OrderItem, Restaurant } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 
@@ -16,15 +17,31 @@ interface Props {
 
 type ShareState = "idle" | "generating" | "sharing" | "done" | "error" | "downloaded";
 
-export function ShareButton({ restaurant, items, tableLabel, tableId, total, currency }: Props) {
+export function ShareButton({
+  restaurant,
+  items,
+  tableLabel,
+  tableId,
+  total,
+  currency,
+}: Props) {
   const cardRef = useRef<ShareCardHandle>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Card generation state (Feature 1)
   const [state, setState] = useState<ShareState>("idle");
 
-  // The QR code on the card links new customers to this restaurant's menu
+  // Food photo state (Feature 2)
+  const [photoSrc, setPhotoSrc] = useState<string | null>(null);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+
+  // The QR code on the card/photo links new customers to this restaurant's menu
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const menuUrl = `${origin}/t/${tableId}`;
+  const accentColor = restaurant?.accent_color ?? "#C9A84C";
 
-  async function handleShare() {
+  // ── Feature 1: Share Order Card Handler ───────────────────────────────────
+  async function handleShareOrderCard() {
     if (state === "generating" || state === "sharing") return;
     setState("generating");
 
@@ -32,7 +49,6 @@ export function ShareButton({ restaurant, items, tableLabel, tableId, total, cur
       const blob = await cardRef.current!.generateBlob();
       const file = new File([blob], "my-order.png", { type: "image/png" });
 
-      // ── Web Share API (mobile) ────────────────────────────────────────────
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         setState("sharing");
         await navigator.share({
@@ -41,12 +57,11 @@ export function ShareButton({ restaurant, items, tableLabel, tableId, total, cur
           text: `Just ordered at ${restaurant?.name ?? "a great restaurant"} 🍽`,
         });
         setState("done");
-        // Reset after a moment so user can share again
         setTimeout(() => setState("idle"), 3000);
         return;
       }
 
-      // ── Fallback: download the image (desktop) ───────────────────────────
+      // Fallback: download the image (desktop)
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -56,7 +71,6 @@ export function ShareButton({ restaurant, items, tableLabel, tableId, total, cur
       setState("downloaded");
       setTimeout(() => setState("idle"), 3000);
     } catch (err) {
-      // User cancelled the share sheet — not a real error
       if (err instanceof Error && err.name === "AbortError") {
         setState("idle");
         return;
@@ -66,11 +80,40 @@ export function ShareButton({ restaurant, items, tableLabel, tableId, total, cur
     }
   }
 
+  // ── Feature 2: Food Photo Camera Picker ───────────────────────────────────
+  function handleTriggerCamera() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setPhotoSrc(url);
+    setIsPhotoModalOpen(true);
+
+    // Reset input so user can re-pick same photo if needed
+    e.target.value = "";
+  }
+
+  function handleRetakePhoto() {
+    fileInputRef.current?.click();
+  }
+
+  function handleCloseModal() {
+    setIsPhotoModalOpen(false);
+    if (photoSrc) {
+      URL.revokeObjectURL(photoSrc);
+      setPhotoSrc(null);
+    }
+  }
+
   const isLoading = state === "generating" || state === "sharing";
 
   return (
     <>
-      {/* Hidden canvas — renders off-screen */}
+      {/* Hidden canvas for Feature 1 (Order Card) */}
       <ShareCard
         ref={cardRef}
         restaurant={restaurant}
@@ -81,103 +124,137 @@ export function ShareButton({ restaurant, items, tableLabel, tableId, total, cur
         menuUrl={menuUrl}
       />
 
-      {/* Visible share card UI */}
+      {/* Hidden file input for Feature 2 (Food Photo Camera / Gallery) */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
+
+      {/* Feature 2 Modal */}
+      <FoodPhotoModal
+        isOpen={isPhotoModalOpen}
+        onClose={handleCloseModal}
+        imageSrc={photoSrc}
+        restaurant={restaurant}
+        tableLabel={tableLabel}
+        tableId={tableId}
+        onRetake={handleRetakePhoto}
+      />
+
+      {/* Social Hub Section */}
       <section className="bg-surface-container-low rounded-3xl border border-outline-variant/30 shadow-xs overflow-hidden">
         {/* Header gradient band */}
         <div
           className="h-1 w-full"
           style={{
-            background: `linear-gradient(90deg, transparent, ${restaurant?.accent_color ?? "#C9A84C"}, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
           }}
         />
 
         <div className="p-5 flex flex-col gap-4">
-          {/* Heading row */}
+          {/* Header Row */}
           <div className="flex items-start gap-3">
             <div
               className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 text-xl"
-              style={{ background: `${restaurant?.accent_color ?? "#C9A84C"}22` }}
+              style={{ background: `${accentColor}22` }}
             >
-              🎉
+              📣
             </div>
             <div>
-              <h2 className="text-sm font-bold text-on-surface">Share your order</h2>
+              <h2 className="text-sm font-bold text-on-surface">Share your experience</h2>
               <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
-                Generate a beautiful card with your order details and share it with friends.
+                Post your meal on Instagram Stories or WhatsApp with branded overlays.
               </p>
             </div>
           </div>
 
-          {/* Mini preview of what the card contains */}
-          <div className="bg-surface-container rounded-2xl p-3 flex flex-col gap-1.5 border border-outline-variant/20">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
-                What's on the card
-              </span>
-              <span className="text-[10px] text-on-surface-variant/60">PNG image</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-0.5">
-              {[
-                `📍 ${tableLabel}`,
-                `🍽 ${items.length} dish${items.length !== 1 ? "es" : ""}`,
-                `💳 ${formatMoney(total, currency)}`,
-                "📷 QR code",
-              ].map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-surface-container-high border border-outline-variant/20 text-on-surface-variant"
+          {/* Dual Options Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {/* Action 1: Snap Food Photo (Feature 2) */}
+            <button
+              onClick={handleTriggerCamera}
+              className="p-3.5 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-left flex flex-col justify-between gap-3 transition-all hover:border-primary/50 group active:scale-[0.98]"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors group-hover:scale-105"
+                  style={{ background: `${accentColor}25`, color: accentColor }}
                 >
-                  {tag}
+                  <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/20">
+                  NEW
                 </span>
-              ))}
-            </div>
+              </div>
+              <div>
+                <span className="text-xs font-bold text-on-surface flex items-center gap-1">
+                  Snap Food Photo
+                  <span className="material-symbols-outlined text-[14px] opacity-70 group-hover:translate-x-0.5 transition-transform">
+                    arrow_forward
+                  </span>
+                </span>
+                <p className="text-[11px] text-on-surface-variant mt-0.5">
+                  Take a photo of your dish with branded sticker & menu QR
+                </p>
+              </div>
+            </button>
+
+            {/* Action 2: Share Order Card (Feature 1) */}
+            <button
+              onClick={handleShareOrderCard}
+              disabled={isLoading}
+              className="p-3.5 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-left flex flex-col justify-between gap-3 transition-all hover:border-outline-variant/60 group active:scale-[0.98] disabled:opacity-60"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="w-9 h-9 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-on-surface">
+                  {isLoading ? (
+                    <Spinner />
+                  ) : state === "done" ? (
+                    <span className="material-symbols-outlined text-[20px] text-emerald-500">
+                      check_circle
+                    </span>
+                  ) : state === "downloaded" ? (
+                    <span className="material-symbols-outlined text-[20px] text-emerald-500">
+                      download_done
+                    </span>
+                  ) : state === "error" ? (
+                    <span className="material-symbols-outlined text-[20px] text-red-500">
+                      error
+                    </span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium text-on-surface-variant/70">
+                  {items.length} dish{items.length !== 1 ? "es" : ""} · {formatMoney(total, currency)}
+                </span>
+              </div>
+              <div>
+                <span className="text-xs font-bold text-on-surface flex items-center gap-1">
+                  {isLoading
+                    ? "Preparing card…"
+                    : state === "done"
+                    ? "Card Shared!"
+                    : state === "downloaded"
+                    ? "Card Saved!"
+                    : "Share Order Card"}
+                  <span className="material-symbols-outlined text-[14px] opacity-70 group-hover:translate-x-0.5 transition-transform">
+                    share
+                  </span>
+                </span>
+                <p className="text-[11px] text-on-surface-variant mt-0.5">
+                  Instant receipt card with your dishes & table details
+                </p>
+              </div>
+            </button>
           </div>
 
-          {/* Share button */}
-          <button
-            onClick={handleShare}
-            disabled={isLoading}
-            className="w-full py-3 px-4 rounded-2xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            style={{
-              background:
-                state === "done" || state === "downloaded"
-                  ? "#16a34a"
-                  : state === "error"
-                  ? "#dc2626"
-                  : restaurant?.accent_color ?? "#C9A84C",
-              color: "#0f0e0c",
-            }}
-          >
-            {isLoading ? (
-              <>
-                <Spinner />
-                <span>{state === "generating" ? "Generating card…" : "Opening share…"}</span>
-              </>
-            ) : state === "done" ? (
-              <>
-                <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                <span>Shared!</span>
-              </>
-            ) : state === "downloaded" ? (
-              <>
-                <span className="material-symbols-outlined text-[18px]">download_done</span>
-                <span>Image saved!</span>
-              </>
-            ) : state === "error" ? (
-              <>
-                <span className="material-symbols-outlined text-[18px]">error</span>
-                <span>Something went wrong — try again</span>
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-[18px]">share</span>
-                <span>Share your order</span>
-              </>
-            )}
-          </button>
-
-          <p className="text-[10px] text-on-surface-variant/50 text-center -mt-1">
-            Opens your phone's share menu · Instagram, WhatsApp, and more
+          <p className="text-[10px] text-on-surface-variant/50 text-center">
+            Zero app installation required · Opens directly into your phone&apos;s share sheet
           </p>
         </div>
       </section>
