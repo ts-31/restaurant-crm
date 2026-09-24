@@ -137,6 +137,7 @@ export function DashboardSidebar({
         </button>
       </div>
 
+
       <ConfirmDialog
         open={showSignOutConfirm}
         title="Sign out of SAVORA?"

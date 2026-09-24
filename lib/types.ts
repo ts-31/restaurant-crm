@@ -123,3 +123,20 @@ export interface CartState {
   chefNotes: string;
   tipRate: number;
 }
+
+export interface TableHealthStat {
+  name: string;
+  total_bytes: number;
+  row_count: number;
+}
+
+export interface DatabaseHealthData {
+  db_bytes: number;
+  db_limit_bytes: number;
+  storage_bytes: number;
+  storage_limit_bytes: number;
+  tables: TableHealthStat[];
+  recorded_at: string;
+  is_fallback?: boolean;
+}
+

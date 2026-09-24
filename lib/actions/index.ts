@@ -1,5 +1,11 @@
 "use server";
 
+import { getDatabaseHealth as fetchHealth } from "./health";
+
+export async function getDatabaseHealth() {
+  return fetchHealth();
+}
+
 import { createClient } from "@/lib/supabase/server";
 import { calcOrderTotals } from "@/lib/money";
 import type { OrderStatus, ServicePacing } from "@/lib/types";

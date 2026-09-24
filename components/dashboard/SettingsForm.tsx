@@ -5,6 +5,7 @@ import Image from "next/image";
 import { updateRestaurantSettings, uploadMenuImage } from "@/lib/actions";
 import type { Restaurant } from "@/lib/types";
 import { useToast } from "@/components/ui/Toast";
+import { DatabaseHealthCard } from "./DatabaseHealthCard";
 
 export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   const [name, setName] = useState(restaurant.name || "");
@@ -83,19 +84,24 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
 
   return (
     <div className="max-w-3xl flex flex-col gap-8 pb-16">
-      {/* Page Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A84C] bg-[#C9A84C]/10 px-2.5 py-1 rounded-full border border-[#C9A84C]/25">
-            Operations Control
-          </span>
+      {/* Page Header & System Telemetry */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A84C] bg-[#C9A84C]/10 px-2.5 py-1 rounded-full border border-[#C9A84C]/25">
+              Operations Control
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#F5ECD7] font-serif tracking-tight">
+            Restaurant Settings & Branding
+          </h1>
+          <p className="text-sm text-[#F5ECD7]/60 mt-1">
+            Configure your venue identity, display currency, and dining tax rules.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#F5ECD7] font-serif tracking-tight">
-          Restaurant Settings & Branding
-        </h1>
-        <p className="text-sm text-[#F5ECD7]/60 mt-1">
-          Configure your venue identity, display currency, and dining tax rules.
-        </p>
+
+        {/* Compact Database Storage Bar */}
+        <DatabaseHealthCard />
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
@@ -333,3 +339,5 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
     </div>
   );
 }
+
+
