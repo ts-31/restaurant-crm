@@ -27,7 +27,13 @@ export function OrdersHistory({ initialOrders, currency = "EUR" }: Props) {
         (order.tables?.label ?? "").toLowerCase().includes(search.toLowerCase());
 
       const matchStatus =
-        statusFilter === "all" ? true : order.status === statusFilter;
+        statusFilter === "all"
+          ? true
+          : statusFilter === "active"
+            ? order.status === "new" ||
+              order.status === "preparing" ||
+              order.status === "ready"
+            : order.status === statusFilter;
 
       return matchSearch && matchStatus;
     });
@@ -117,18 +123,23 @@ export function OrdersHistory({ initialOrders, currency = "EUR" }: Props) {
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {(["all", "served", "new", "preparing", "ready", "cancelled"] as const).map((s) => (
+          {([
+            { key: "all", label: "All" },
+            { key: "active", label: "Active" },
+            { key: "served", label: "Served" },
+            { key: "cancelled", label: "Cancelled" },
+          ] as const).map(({ key, label }) => (
             <button
-              key={s}
+              key={key}
               type="button"
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-colors whitespace-nowrap ${
-                statusFilter === s
+              onClick={() => setStatusFilter(key)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap ${
+                statusFilter === key
                   ? "bg-primary text-white shadow-xs"
                   : "bg-surface-container text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              {s === "all" ? "All Orders" : s}
+              {label}
             </button>
           ))}
         </div>
