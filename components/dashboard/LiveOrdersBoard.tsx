@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { createClient } from "@/lib/supabase/client";
 import { updateOrderStatus } from "@/lib/actions";
 import type { MenuItem, OrderWithItems } from "@/lib/types";
 import { formatMoney, timeAgo } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 type Props = {
   restaurantId: string;
@@ -25,11 +25,12 @@ export function LiveOrdersBoard({
   const [orders, setOrders] = useState<OrderWithItems[]>(initialOrders);
   const [currentTime, setCurrentTime] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [cancelTarget, setCancelTarget] = useState<OrderWithItems | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [showServed, setShowServed] = useState(false);
 
   const { toast } = useToast();
   const knownIds = useRef(new Set(initialOrders.map((o) => o.id)));
+  const [ordersGridRef] = useAutoAnimate({ duration: 450, easing: "ease-out" });
 
   const imageMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -117,19 +118,17 @@ export function LiveOrdersBoard({
     }
   };
 
-  const handleCancelOrder = async () => {
-    if (!cancelTarget) return;
+  const handleCancelOrder = async (orderId: string, tableLabel: string) => {
     try {
-      setProcessingId(cancelTarget.id);
-      setOrders((prev) => prev.filter((o) => o.id !== cancelTarget.id));
-      await updateOrderStatus(cancelTarget.id, "cancelled");
-      toast(`Order for ${cancelTarget.tables?.label || "Table"} cancelled`, "info");
+      setCancellingId(orderId);
+      await updateOrderStatus(orderId, "cancelled");
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      toast(`Order for ${tableLabel} cancelled`, "info");
     } catch {
       toast("Failed to cancel order", "error");
       await refetch();
     } finally {
-      setProcessingId(null);
-      setCancelTarget(null);
+      setCancellingId(null);
     }
   };
 
@@ -206,12 +205,14 @@ export function LiveOrdersBoard({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div ref={ordersGridRef} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {displayedOrders.map((order) => {
             const tableLabel = order.tables?.label || "Table";
             const section = order.tables?.section;
             const isServed = order.status === "served";
             const isProcessing = processingId === order.id;
+            const isCancelling = cancellingId === order.id;
+            const isBusy = isProcessing || isCancelling;
             const orderAgeMs = Date.now() - new Date(order.placed_at).getTime();
             const isRecent = orderAgeMs < 3 * 60 * 1000 && !isServed;
 
@@ -415,7 +416,7 @@ export function LiveOrdersBoard({
                     {!isServed ? (
                       <button
                         type="button"
-                        disabled={isProcessing}
+                        disabled={isBusy}
                         onClick={() => handleMarkServed(order.id, tableLabel)}
                         className="flex-1 py-3 px-4 rounded-xl bg-[#C9A84C] text-[#0f0e0c] font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                       >
@@ -440,12 +441,16 @@ export function LiveOrdersBoard({
                     {!isServed && (
                       <button
                         type="button"
-                        disabled={isProcessing}
-                        onClick={() => setCancelTarget(order)}
+                        disabled={isBusy}
+                        onClick={() => handleCancelOrder(order.id, tableLabel)}
                         title="Cancel Order"
-                        className="p-3.5 rounded-xl bg-[#1a1816] hover:bg-[#E86C5D]/15 text-[#A89880] hover:text-[#E86C5D] border border-[#C9A84C]/15 hover:border-[#E86C5D]/30 transition-colors shrink-0"
+                        className="p-3.5 rounded-xl bg-[#1a1816] hover:bg-[#E86C5D]/15 text-[#A89880] hover:text-[#E86C5D] border border-[#C9A84C]/15 hover:border-[#E86C5D]/30 transition-colors shrink-0 disabled:opacity-50 flex items-center justify-center"
                       >
-                        <span className="material-symbols-outlined text-[20px]">close</span>
+                        {isCancelling ? (
+                          <span className="w-5 h-5 border-2 border-[#E86C5D]/40 border-t-[#E86C5D] rounded-full animate-spin" />
+                        ) : (
+                          <span className="material-symbols-outlined text-[20px]">close</span>
+                        )}
                       </button>
                     )}
                   </div>
@@ -455,20 +460,6 @@ export function LiveOrdersBoard({
           })}
         </div>
       )}
-
-      <ConfirmDialog
-        open={!!cancelTarget}
-        title="Cancel Order?"
-        description={`Are you sure you want to cancel order ${cancelTarget?.order_number || ""} for ${
-          cancelTarget?.tables?.label || "this table"
-        }? This will remove it from the kitchen display.`}
-        confirmLabel="Yes, Cancel Order"
-        cancelLabel="Keep Order"
-        danger
-        loading={!!processingId}
-        onConfirm={handleCancelOrder}
-        onCancel={() => setCancelTarget(null)}
-      />
 
 
     </div>
