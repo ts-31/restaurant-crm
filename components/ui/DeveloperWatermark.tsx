@@ -15,7 +15,7 @@ export function DeveloperWatermark() {
   return (
     <div
       aria-label="Developer Attribution & Contact"
-      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[99999] flex flex-col items-end font-sans select-none"
+      className="fixed bottom-[74px] sm:bottom-6 right-3 sm:right-6 z-[99999] flex flex-col items-end font-sans select-none"
     >
       {/* ─── Expanded Contact Card ─── */}
       {isOpen && (
