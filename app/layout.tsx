@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { TopLoaderProvider } from "@/components/ui/TopLoader";
-import { DeveloperWatermark } from "@/components/ui/DeveloperWatermark";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -43,7 +42,6 @@ export default function RootLayout({
           <TopLoaderProvider>
             <ToastProvider>
               {children}
-              <DeveloperWatermark />
             </ToastProvider>
           </TopLoaderProvider>
         </Suspense>
