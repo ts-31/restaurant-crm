@@ -1,4 +1,6 @@
 export type OrderStatus = "new" | "preparing" | "ready" | "served" | "cancelled";
+export type PaymentStatus = "unpaid" | "pending" | "paid" | "failed" | "refunded";
+export type PaymentMethod = "cash" | "stripe";
 export type ServicePacing = "Together" | "Drinks First" | "Coursed";
 export type StaffRole = "staff" | "owner";
 
@@ -73,6 +75,10 @@ export interface Order {
   table_id: string;
   order_number: string;
   status: OrderStatus;
+  payment_status: PaymentStatus;
+  payment_method: PaymentMethod;
+  stripe_session_id?: string | null;
+  stripe_payment_intent_id?: string | null;
   pacing: ServicePacing;
   chef_notes: string | null;
   subtotal: number;

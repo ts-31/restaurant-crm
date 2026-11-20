@@ -14,6 +14,7 @@ import {
 } from "@/lib/cart";
 import { calcOrderTotals } from "@/lib/money";
 import { placeOrder } from "@/lib/actions";
+import { createStripeCheckoutSession } from "@/lib/actions/stripe";
 import type { CartState } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { QtyStepper } from "@/components/ui/QtyStepper";
@@ -33,6 +34,7 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "stripe">("cash");
 
   useEffect(() => {
     setCart(loadCart(tableId, 0));
@@ -59,9 +61,10 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
     setPlacing(true);
     setError(null);
     startLoading();
-    const result = await placeOrder({
+
+    const orderPayload = {
       tableId,
-      pacing: "Together",
+      pacing: "Together" as const,
       chefNotes: cart.chefNotes,
       tipRate: 0,
       lines: cart.lines.map((l) => ({
@@ -69,7 +72,23 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
         quantity: l.quantity,
         note: l.note,
       })),
-    });
+    };
+
+    if (paymentMethod === "stripe") {
+      const result = await createStripeCheckoutSession(orderPayload);
+      if (result.error || !result.url) {
+        setPlacing(false);
+        stopLoading();
+        setError(result.error ?? "Failed to initialize payment");
+        return;
+      }
+      clearCart(tableId);
+      window.location.href = result.url;
+      return;
+    }
+
+    // Cash / Pay at table flow (original)
+    const result = await placeOrder(orderPayload);
     if (result.error || !result.orderId) {
       setPlacing(false);
       stopLoading();
@@ -215,6 +234,42 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
         </div>
 
         <div className="flex flex-col w-full lg:w-1/3 space-y-space-md">
+          {/* Payment Method Toggle */}
+          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm space-y-space-sm">
+            <span className="font-title-sm text-title-sm text-on-surface">Payment Method</span>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("cash")}
+                className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all ${
+                  paymentMethod === "cash"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-outline-variant/30 text-on-surface-variant hover:border-primary/50"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[22px]">payments</span>
+                <span className="font-label-md text-label-md">Pay at Table</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("stripe")}
+                className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all ${
+                  paymentMethod === "stripe"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-outline-variant/30 text-on-surface-variant hover:border-primary/50"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[22px]">credit_card</span>
+                <span className="font-label-md text-label-md">Pay Online</span>
+              </button>
+            </div>
+            {paymentMethod === "stripe" && (
+              <p className="text-[11px] text-on-surface-variant text-center pt-1">
+                Secure checkout via Stripe · Card, Apple Pay & Google Pay accepted
+              </p>
+            )}
+          </div>
+
           <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm space-y-space-sm sticky top-24">
             <div className="flex items-center justify-between">
               <span className="font-title-md text-title-md text-on-surface">Order Summary</span>
@@ -252,14 +307,24 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
               className="w-full min-h-[52px] bg-primary text-on-primary rounded-xl font-label-lg text-label-lg flex items-center justify-between px-5 shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               <span className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px]">soup_kitchen</span>
-                <span>{placing ? "Sending…" : `Place Order to ${tableLabel}`}</span>
+                <span className="material-symbols-outlined text-[20px]">
+                  {paymentMethod === "stripe" ? "credit_card" : "soup_kitchen"}
+                </span>
+                <span>
+                  {placing
+                    ? paymentMethod === "stripe" ? "Redirecting to Stripe…" : "Sending…"
+                    : paymentMethod === "stripe" ? "Pay Online with Card" : `Place Order to ${tableLabel}`}
+                </span>
               </span>
               <span className="font-title-md text-title-md tracking-tight">{formatMoney(totals.total)}</span>
             </button>
             <div className="flex items-center justify-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
               <span className="material-symbols-outlined text-[14px]">lock</span>
-              <span>Sent directly to kitchen station · Pay at table</span>
+              <span>
+                {paymentMethod === "stripe"
+                  ? "Secured by Stripe · 256-bit SSL encryption"
+                  : "Sent directly to kitchen station · Pay at table"}
+              </span>
             </div>
           </div>
         </div>
@@ -274,11 +339,23 @@ export function CartView({ tableId, tableLabel, taxRate }: Props) {
             className="w-full min-h-[52px] bg-primary text-on-primary rounded-xl font-label-lg text-label-lg flex items-center justify-between px-5 shadow-lg active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px]">soup_kitchen</span>
-              <span>{placing ? "Sending…" : `Place Order to ${tableLabel}`}</span>
+              <span className="material-symbols-outlined text-[20px]">
+                {paymentMethod === "stripe" ? "credit_card" : "soup_kitchen"}
+              </span>
+              <span>
+                {placing
+                  ? paymentMethod === "stripe" ? "Redirecting…" : "Sending…"
+                  : paymentMethod === "stripe" ? "Pay Online with Card" : `Place Order to ${tableLabel}`}
+              </span>
             </span>
             <span className="font-title-md text-title-md tracking-tight">{formatMoney(totals.total)}</span>
           </button>
+          {paymentMethod === "stripe" && (
+            <div className="flex items-center justify-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+              <span className="material-symbols-outlined text-[14px]">lock</span>
+              <span>Secured by Stripe · 256-bit SSL</span>
+            </div>
+          )}
         </div>
       </aside>
     </div>

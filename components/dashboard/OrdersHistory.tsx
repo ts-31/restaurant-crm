@@ -199,13 +199,24 @@ export function OrdersHistory({ initialOrders, currency = "EUR" }: Props) {
                         {formatMoney(Number(order.total), currency)}
                       </td>
                       <td className="py-3 px-4">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize border ${
-                            statusColors[order.status as OrderStatus] || ""
-                          }`}
-                        >
-                          {order.status}
-                        </span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <span
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize border ${
+                              statusColors[order.status as OrderStatus] || ""
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                          {order.payment_method === "stripe" && order.payment_status === "paid" ? (
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                              <span className="material-symbols-outlined text-[12px]">verified</span> Paid (Stripe)
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-on-surface-variant font-medium">
+                              Pay at Table
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-right">
                         <button

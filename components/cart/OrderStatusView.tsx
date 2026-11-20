@@ -7,6 +7,45 @@ import type { Order, OrderItem, OrderStatus, Restaurant } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { ShareButton } from "./ShareButton";
 
+function PaymentBadge({ order }: { order: Order }) {
+  const paymentStatus = order.payment_status ?? "unpaid";
+  const paymentMethod = order.payment_method ?? "cash";
+
+  if (paymentMethod === "stripe") {
+    if (paymentStatus === "paid") {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30">
+          <span className="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+          <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Paid · Stripe</span>
+        </div>
+      );
+    }
+    if (paymentStatus === "pending") {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30">
+          <span className="material-symbols-outlined text-[16px] text-amber-600">pending</span>
+          <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Payment Pending</span>
+        </div>
+      );
+    }
+    if (paymentStatus === "failed") {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/15 border border-red-500/30">
+          <span className="material-symbols-outlined text-[16px] text-red-600">error</span>
+          <span className="text-[11px] font-bold text-red-700 uppercase tracking-wide">Payment Failed</span>
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container border border-outline-variant/30">
+      <span className="material-symbols-outlined text-[16px] text-on-surface-variant">payments</span>
+      <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wide">Pay at Table</span>
+    </div>
+  );
+}
+
 const STATUS_STEPS: { status: OrderStatus; label: string; icon: string }[] = [
   { status: "new", label: "Received", icon: "check_circle" },
   { status: "preparing", label: "Cooking", icon: "skillet" },
@@ -91,6 +130,8 @@ export function OrderStatusView({
               {tableLabel}
             </div>
           </div>
+
+          <PaymentBadge order={order} />
 
           {/* Real-time Order Progress Stepper */}
           <div className="w-full pt-4 mt-2 border-t border-outline-variant/20">
@@ -187,7 +228,13 @@ export function OrderStatusView({
           </div>
           <div className="flex items-center gap-1.5 text-[11px] text-on-surface-variant pt-1">
             <span className="material-symbols-outlined text-[14px]">lock</span>
-            <span>Pay directly at your table at conclusion of dining</span>
+            <span>
+              {order.payment_method === "stripe" && order.payment_status === "paid"
+                ? "Payment confirmed via Stripe"
+                : order.payment_method === "stripe"
+                ? "Complete payment at Stripe checkout"
+                : "Pay directly at your table at conclusion of dining"}
+            </span>
           </div>
         </section>
 

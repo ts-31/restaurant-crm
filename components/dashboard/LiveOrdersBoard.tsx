@@ -274,6 +274,12 @@ export function LiveOrdersBoard({
                             Served
                           </span>
                         )}
+                        {order.payment_status === "paid" && (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/80 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[11px]">credit_card</span>
+                            Paid
+                          </span>
+                        )}
                       </div>
                       {section && (
                         <span className="text-[11px] text-white/60 mt-0.5 drop-shadow">{section}</span>
@@ -406,7 +412,23 @@ export function LiveOrdersBoard({
                 {/* ── Footer: Total + Actions (Pinned to bottom) ── */}
                 <div className="px-4 pb-4 pt-3 flex flex-col gap-3 shrink-0 border-t border-[#C9A84C]/15 bg-[#131210]">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#A89880]">Total Bill</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#A89880]">Total Bill</span>
+                      {order.payment_method === "stripe" && order.payment_status === "paid" ? (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">verified</span>
+                          Paid (Stripe)
+                        </span>
+                      ) : order.payment_method === "stripe" && order.payment_status === "pending" ? (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                          Stripe Pending
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/25 text-[#C9A84C] text-[10px] font-bold uppercase tracking-wider">
+                          Pay at Table
+                        </span>
+                      )}
+                    </div>
                     <span className="text-lg font-black text-[#C9A84C] font-mono">
                       {formatMoney(Number(order.total))}
                     </span>

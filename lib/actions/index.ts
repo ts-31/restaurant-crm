@@ -95,6 +95,8 @@ export async function placeOrder(input: PlaceOrderInput) {
       table_id: table.id,
       order_number: orderNumber,
       status: "new",
+      payment_status: "unpaid",
+      payment_method: "cash",
       pacing: input.pacing,
       chef_notes: input.chefNotes || null,
       subtotal: totals.subtotal,
