@@ -189,6 +189,5 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ## 👨‍💻 Author
 
-**Gaurav Bachhav**  
-*Full Stack Web Developer*  
+**Tejas**  
 - GitHub: [@ts-31](https://github.com/ts-31)
