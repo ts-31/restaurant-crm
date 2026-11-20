@@ -8,6 +8,7 @@ import { upsertLine, loadCart, cartItemCount, cartSubtotal, saveCart } from "@/l
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Drawer } from "@/components/ui/Drawer";
 import { useToast } from "@/components/ui/Toast";
+import { RestaurantMapCard } from "@/components/ui/RestaurantMapCard";
 
 type Props = {
   tableId: string;
@@ -20,6 +21,9 @@ type Props = {
   categories: { id: string; name: string }[];
   items: MenuItem[];
   defaultTipRate: number;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export function GuestMenu({
@@ -31,6 +35,9 @@ export function GuestMenu({
   categories,
   items,
   defaultTipRate,
+  address,
+  latitude,
+  longitude,
 }: Props) {
   const [mounted, setMounted] = useState(false);
   const [categoryId, setCategoryId] = useState<string | "all">("all");
@@ -294,6 +301,17 @@ export function GuestMenu({
           );
         })}
       </main>
+
+      {/* ─── Restaurant Location & Google Maps Card ──────────────── */}
+      <div className="max-w-xl mx-auto w-full px-4 mb-24">
+        <RestaurantMapCard
+          name={restaurantName}
+          address={address}
+          latitude={latitude}
+          longitude={longitude}
+          title="Visit Our Restaurant"
+        />
+      </div>
 
       {/* ─── Item Detail Bottom Sheet (Drawer) ───────────────────────── */}
       <Drawer

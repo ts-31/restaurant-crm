@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Order, OrderItem, OrderStatus, Restaurant } from "@/lib/types";
 import { formatMoney } from "@/lib/utils";
 import { ShareButton } from "./ShareButton";
+import { RestaurantMapCard } from "@/components/ui/RestaurantMapCard";
 
 function PaymentBadge({ order }: { order: Order }) {
   const paymentStatus = order.payment_status ?? "unpaid";
@@ -237,6 +238,15 @@ export function OrderStatusView({
             </span>
           </div>
         </section>
+
+        {/* Google Maps Venue & Directions Card */}
+        <RestaurantMapCard
+          name={restaurant?.name || "Maison Aurelia"}
+          address={restaurant?.address}
+          latitude={restaurant?.latitude}
+          longitude={restaurant?.longitude}
+          title="Restaurant Location & Navigation"
+        />
 
         {/* Action button */}
         <Link

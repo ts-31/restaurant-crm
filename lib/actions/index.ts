@@ -312,6 +312,9 @@ export async function updateRestaurantSettings(input: {
   currency?: string;
   logo_url?: string | null;
   accent_color?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }) {
   const supabase = await createClient();
   const {
@@ -332,19 +335,13 @@ export async function updateRestaurantSettings(input: {
     currency: input.currency ?? "EUR",
     logo_url: input.logo_url !== undefined ? input.logo_url : undefined,
     accent_color: input.accent_color !== undefined ? input.accent_color : undefined,
+    address: input.address !== undefined ? input.address : undefined,
+    latitude: input.latitude !== undefined ? input.latitude : undefined,
+    longitude: input.longitude !== undefined ? input.longitude : undefined,
   };
 
   if (input.tagline !== undefined) {
-    const { error: taglineError } = await supabase
-      .from("restaurants")
-      .update({ ...basePayload, tagline: input.tagline })
-      .eq("id", profile.restaurant_id);
-
-    if (!taglineError) {
-      revalidatePath("/dashboard/settings");
-      revalidatePath("/dashboard");
-      return { ok: true };
-    }
+    basePayload.tagline = input.tagline;
   }
 
   const { error } = await supabase
@@ -355,6 +352,7 @@ export async function updateRestaurantSettings(input: {
   if (error) return { error: error.message };
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");
+  revalidatePath("/t", "layout");
   return { ok: true };
 }
 

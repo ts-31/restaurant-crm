@@ -76,7 +76,14 @@ flowchart TD
 - **Ticket Lifecycle Management**: Transition tickets through kitchen phases with one click, triggering real-time customer status changes.
 - **Acoustic & Visual Alerts**: Ambient sound cues and visual pulses on incoming high-priority orders.
 
-### 4. ⚙️ Administrative Operations & CMS
+### 4. 🗺️ Keyless Google Maps & Geolocation Services
+- **Keyless Google Maps Integration**: Zero-cost, keyless map embedding utilizing Google's public coordinates protocol (`maps.google.com/maps?q=lat,lng&output=embed`) and 1-click directions links (`/maps/dir/`).
+- **1-Click GPS Location & Reverse Geocoding**: Detects restaurant coordinates using browser Geolocation API and instantly resolves human-readable street addresses via OpenStreetMap Nominatim with no API keys.
+- **Typeahead Address Autocomplete**: Real-time debounced location suggestion dropdown while typing addresses in Settings.
+- **Guest Venue Cards**: Interactive map cards embedded at the bottom of the digital guest menu and customer order receipt pages.
+- **Quick City Presets**: Pre-configured coordinates for global culinary capitals (Paris, Dubai, London, New York, Mumbai) for instantaneous venue demonstration.
+
+### 5. ⚙️ Administrative Operations & CMS
 - **Menu Availability Toggle (86'd Items)**: Instantly mark out-of-stock ingredients to disable ordering across all active digital menus.
 - **Dynamic QR Code Engine**: Generate, customize, and print high-resolution SVG/PNG table QR codes on the fly.
 - **Branding Customization**: Configure restaurant identity, tax rates, currency format (`EUR`, `USD`, `INR`), and accent colors.
@@ -143,6 +150,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 Execute the consolidated database migration in your Supabase SQL Editor:
 - File located at: `supabase/schema_setup.sql`
 - Run Stripe migration: `supabase/migrations/0007_stripe_payments.sql`
+- Run Location migration: `supabase/migrations/0008_restaurant_location.sql`
 
 ### 5. Start the development server
 ```bash
@@ -171,8 +179,8 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 - [x] **Phase 1: Core Architecture** (Next.js 15, Supabase PostgreSQL, RLS, Realtime KDS)
 - [x] **Phase 2: Payment Gateway** (Stripe Checkout Sessions, Webhook Verification, Payment Badges)
-- [ ] **Phase 3: Customer Notifications** (Automated WhatsApp & SMS Receipts via Twilio)
-- [ ] **Phase 4: Geolocation Services** (Google Maps restaurant pin & takeaway address picker)
+- [x] **Phase 3: Geolocation Services** (Keyless Google Maps venue locator, GPS auto-detect, reverse geocoding, typeahead address search, guest navigation cards)
+- [ ] **Phase 4: Customer Notifications** (Automated WhatsApp & SMS Receipts via Twilio)
 - [ ] **Phase 5: CRM / ERP Integration** (Outbound webhooks for enterprise data sync)
 - [ ] **Phase 6: Technical SEO** (Schema.org JSON-LD `Restaurant` & `Menu` structured data)
 - [ ] **Phase 7: Containerization** (Production-ready Docker & docker-compose orchestration)

@@ -14,6 +14,9 @@ export interface Restaurant {
   currency: string;
   logo_url: string | null;
   accent_color: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   created_at?: string;
 }
 

@@ -59,6 +59,9 @@ export default async function TableMenuPage({
       categories={categories ?? []}
       items={(items ?? []) as MenuItem[]}
       defaultTipRate={Number(restaurant.default_tip_rate)}
+      address={restaurant.address}
+      latitude={restaurant.latitude}
+      longitude={restaurant.longitude}
     />
   );
 }
